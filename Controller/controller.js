@@ -40,13 +40,13 @@ export const signUp = async (req, res) => {
 
 
 export const login = async (req, res) => {
-    const { name, pass } = req.body;
+    const { name, password } = req.body;
 
     try {
         const user = await fmsCollection.findOne({ name })
         if (!user) return res.status(400).json({ message: "Account doesn't Exist" })
 
-        const user_password = await bcrypt.compare(pass, user.password)
+        const user_password = await bcrypt.compare(password, user.password)
         if (!user_password) return res.status(400).json({ message: "invalid credential" })
 
         res.json({
