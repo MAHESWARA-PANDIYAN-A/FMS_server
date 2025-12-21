@@ -10,14 +10,15 @@ const generateToken = (id) => {
 }
 
 export const signUp = async (req, res) => {
-    const { name, email, pass, phone } = req.body;
+    const { name, email, password, phone } = req.body;
+    console.log('Signup request:', { name, email, phone, passwordLength: password?.length });
 
     try {
         const user = await fmsCollection.findOne({ email })
         if (user) return res.status(400).json({ message: "user already exist" })
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPass = await bcrypt.hash(pass, salt)
+        const hashedPass = await bcrypt.hash(password, salt)
         const newUser = new fmsCollection({ name,phone, email, password: hashedPass })
 
         await newUser.save()
@@ -41,6 +42,7 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
     const { name, password } = req.body;
+    console.log('Login request:', { name, passwordLength: password?.length });
 
     try {
         const user = await fmsCollection.findOne({ name })

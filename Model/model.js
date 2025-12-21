@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import connectDb from "../DB/db.js";
 
 
 const fmsSchema = mongoose.Schema({
