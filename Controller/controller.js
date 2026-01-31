@@ -14,15 +14,25 @@ export const signUp = async (req, res) => {
     console.log('Signup request:', { name, email, phone, passwordLength: password?.length });
 
     try {
-        const user = await fmsCollection.findOne({ email })
-        if (user) return res.status(400).json({ message: "user already exist" })
+        const userByEmail = await fmsCollection.findOne({ email })
+        if (userByEmail) {
+            console.log("Signup failed: Email already exists", email);
+            return res.status(400).json({ message: "Email already exists" })
+        }
+
+        const userByName = await fmsCollection.findOne({ name })
+        if (userByName) {
+            console.log("Signup failed: Username already exists", name);
+            return res.status(400).json({ message: "Username already taken" })
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPass = await bcrypt.hash(password, salt)
-        const newUser = new fmsCollection({ name,phone, email, password: hashedPass })
+        const newUser = new fmsCollection({ name, phone, email, password: hashedPass })
 
         await newUser.save()
-        
+        console.log("User created successfully:", newUser._id);
+
         res.status(201).json({
             _id: newUser._id,
             name: newUser.name,
@@ -42,15 +52,22 @@ export const signUp = async (req, res) => {
 
 export const login = async (req, res) => {
     const { name, password } = req.body;
-    console.log('Login request:', { name, passwordLength: password?.length });
+    console.log('Login attempt for:', name);
 
     try {
         const user = await fmsCollection.findOne({ name })
-        if (!user) return res.status(400).json({ message: "Account doesn't Exist" })
+        if (!user) {
+            console.log("Login failed: User not found -", name);
+            return res.status(400).json({ message: "Account doesn't Exist" })
+        }
 
         const user_password = await bcrypt.compare(password, user.password)
-        if (!user_password) return res.status(400).json({ message: "invalid credential" })
+        if (!user_password) {
+            console.log("Login failed: Invalid password for -", name);
+            return res.status(400).json({ message: "invalid credential" })
+        }
 
+        console.log("Login successful for:", name);
         res.json({
             _id: user._id,
             name: user.name,
@@ -62,5 +79,15 @@ export const login = async (req, res) => {
     }
     catch (err) {
         res.status(500).json({ message: err.message })
+    }
+}
+
+export const getUserCount = async (req, res) => {
+    try {
+        const count = await fmsCollection.countDocuments()
+        res.json({ count })
+    } catch (err) {
+        console.error('Error getting user count:', err)
+        res.status(500).json({ message: 'Error fetching user count' })
     }
 }

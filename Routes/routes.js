@@ -1,5 +1,5 @@
 import express from 'express'
-import { signUp, login } from '../Controller/controller.js'
+import { signUp, login, getUserCount } from '../Controller/controller.js'
 import { createRequest, getRequests, getUserRequests, updateRequestStatus } from '../Controller/requestController.js'
 
 const route = express.Router();
@@ -7,6 +7,7 @@ const route = express.Router();
 // Auth routes
 route.post('/signup', signUp);
 route.post('/login', login);
+route.get('/users/count', getUserCount);
 
 // Request routes
 route.post('/requests', createRequest);
