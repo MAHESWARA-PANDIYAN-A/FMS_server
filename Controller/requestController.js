@@ -1,13 +1,12 @@
 import RequestCollection from '../Model/requestModel.js';
 
 export const createRequest = async (req, res) => {
-    const { requestNo, date, customer, amount, plan, priority, userId } = req.body;
+    const { date, customer, amount, plan, priority, userId } = req.body;
 
     try {
-        const existingRequest = await RequestCollection.findOne({ requestNo });
-        if (existingRequest) {
-            return res.status(400).json({ message: "Request number already exists" });
-        }
+        // Auto-generate unique requestNo
+        const lastRequest = await RequestCollection.findOne().sort({ _id: -1 });
+        const requestNo = lastRequest ? (parseInt(lastRequest.requestNo) + 1).toString() : '1';
 
         const newRequest = new RequestCollection({
             requestNo,
